@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:createatimetrackingapp/models/time_entry.dart';
 
 class AddTimeEntryScreen extends StatefulWidget {
+  const AddTimeEntryScreen({super.key});
+
   @override
-  _AddTimeEntryScreenState createState() => _AddTimeEntryScreenState();
+  State<AddTimeEntryScreen> createState() => _AddTimeEntryScreenState();
 }
 
 class _AddTimeEntryScreenState extends State<AddTimeEntryScreen> {
@@ -19,165 +21,145 @@ class _AddTimeEntryScreenState extends State<AddTimeEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Time Entry'),
-        backgroundColor: const Color(0xFF458B7D),
-      ),
+      appBar: AppBar(title: const Text('New Time Entry')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: Consumer<TimeEntryProvider>(
             builder: (context, provider, child) {
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text(
-                    'Project',
-                    style: TextStyle(color: Colors.black54),
-                  ),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSectionTitle('Project & Task'),
+                  const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: projectId,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        projectId = newValue;
-                      });
-                    },
-                    validator: (value) =>
-                        value == null ? 'Please select a project' : null,
-                    decoration: const InputDecoration(border: InputBorder.none),
-                    items: provider.projects.map<DropdownMenuItem<String>>((
-                      project,
-                    ) {
-                      return DropdownMenuItem<String>(
-                        value: project.id,
-                        child: Text(
-                          project.name,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      );
-                    }).toList(),
+                    initialValue: projectId,
+                    decoration: const InputDecoration(
+                      labelText: 'Select Project',
+                      prefixIcon: Icon(Icons.folder_outlined),
+                    ),
+                    onChanged: (val) => setState(() => projectId = val),
+                    validator: (v) => v == null ? 'Required' : null,
+                    items: provider.projects
+                        .map(
+                          (p) => DropdownMenuItem(
+                            value: p.id,
+                            child: Text(p.name),
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Task', style: TextStyle(color: Colors.black54)),
                   DropdownButtonFormField<String>(
-                    value: taskId,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        taskId = newValue;
-                      });
-                    },
-                    validator: (value) =>
-                        value == null ? 'Please select a task' : null,
-                    decoration: const InputDecoration(border: InputBorder.none),
-                    items: provider.tasks.map<DropdownMenuItem<String>>((task) {
-                      return DropdownMenuItem<String>(
-                        value: task.id,
-                        child: Text(
-                          task.name,
-                          style: const TextStyle(fontSize: 18),
+                    initialValue: taskId,
+                    decoration: const InputDecoration(
+                      labelText: 'Select Task',
+                      prefixIcon: Icon(Icons.task_alt),
+                    ),
+                    onChanged: (val) => setState(() => taskId = val),
+                    validator: (v) => v == null ? 'Required' : null,
+                    items: provider.tasks
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t.id,
+                            child: Text(t.name),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('Duration & Date'),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Hours',
+                            prefixIcon: Icon(Icons.timer_outlined),
+                            hintText: '0.0',
+                          ),
+                          validator: (v) =>
+                              (v == null || double.tryParse(v) == null)
+                              ? 'Invalid'
+                              : null,
+                          onSaved: (v) => totalTime = double.parse(v!),
                         ),
-                      );
-                    }).toList(),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: date,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) setState(() => date = picked);
+                          },
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Date',
+                              prefixIcon: Icon(Icons.calendar_today_outlined),
+                            ),
+                            child: Text(
+                              '${date.day}/${date.month}/${date.year}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Date: ${date.toString().substring(0, 10)}',
-                    style: const TextStyle(fontSize: 18),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('Notes'),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      hintText: 'What did you work on?',
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.only(bottom: 40),
+                        child: Icon(Icons.notes),
+                      ),
+                    ),
+                    onSaved: (v) => notes = v ?? '',
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 48),
                   ElevatedButton(
-                    onPressed: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: date,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null && picked != date) {
-                        setState(() {
-                          date = picked;
-                        });
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        provider.addTimeEntry(
+                          TimeEntry(
+                            id: DateTime.now().millisecondsSinceEpoch
+                                .toString(),
+                            projectId: projectId!,
+                            taskId: taskId!,
+                            totalTime: totalTime,
+                            date: date,
+                            notes: notes,
+                          ),
+                        );
+                        Navigator.pop(context);
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[100],
-                      foregroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text('Select Date'),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Total Time (in hours)',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  TextFormField(
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(border: InputBorder.none),
-                    style: const TextStyle(fontSize: 18),
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Please enter total time';
-                      if (double.tryParse(value) == null)
-                        return 'Please enter a valid number';
-                      return null;
-                    },
-                    onSaved: (value) => totalTime = double.parse(value!),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text('Note', style: TextStyle(color: Colors.black54)),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter notes here...',
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    style: const TextStyle(fontSize: 18),
-                    onSaved: (value) => notes = value ?? '',
-                  ),
-                  const SizedBox(height: 40),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                          provider.addTimeEntry(
-                            TimeEntry(
-                              id: DateTime.now().millisecondsSinceEpoch
-                                  .toString(),
-                              projectId: projectId!,
-                              taskId: taskId!,
-                              totalTime: totalTime,
-                              date: date,
-                              notes: notes,
-                            ),
-                          );
-                          Navigator.pop(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.blue,
-                        side: const BorderSide(color: Colors.blue),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Save Time Entry',
-                        style: TextStyle(fontSize: 18),
+                    child: const Text(
+                      'Save Entry',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -186,6 +168,18 @@ class _AddTimeEntryScreenState extends State<AddTimeEntryScreen> {
             },
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title.toUpperCase(),
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[600],
+        letterSpacing: 1.2,
       ),
     );
   }

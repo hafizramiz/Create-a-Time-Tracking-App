@@ -4,27 +4,49 @@ import 'package:createatimetrackingapp/provider/time_entry_provider.dart';
 import '../models/task.dart';
 
 class TaskManagementScreen extends StatelessWidget {
+  const TaskManagementScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Tasks'),
-        backgroundColor: const Color(0xFF4B1D6E),
-      ),
+      appBar: AppBar(title: const Text('Manage Tasks')),
       body: Consumer<TimeEntryProvider>(
         builder: (context, provider, child) {
           if (provider.tasks.isEmpty) {
             return const Center(child: Text('No tasks yet. Add one!'));
           }
           return ListView.builder(
+            padding: const EdgeInsets.all(16),
             itemCount: provider.tasks.length,
             itemBuilder: (context, index) {
               final task = provider.tasks[index];
-              return ListTile(
-                title: Text(task.name, style: const TextStyle(fontSize: 18)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Color(0xFFD32F2F)),
-                  onPressed: () => provider.deleteTask(task.id),
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  leading: CircleAvatar(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    child: Icon(
+                      Icons.task_alt,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  title: Text(
+                    task.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                    onPressed: () => provider.deleteTask(task.id),
+                  ),
                 ),
               );
             },
@@ -32,10 +54,8 @@ class TaskManagementScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddTaskDialog(context);
-        },
-        child: const Icon(Icons.add, size: 36),
+        onPressed: () => _showAddTaskDialog(context),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -45,35 +65,21 @@ class TaskManagementScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Add Task', style: TextStyle(fontSize: 24)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Task Name',
-              style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-            ),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'Task 1',
-                hintStyle: TextStyle(color: Colors.grey),
-              ),
-              autofocus: true,
-            ),
-          ],
+        title: const Text('New Task'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Task Name',
+            hintText: 'e.g. Code Review',
+          ),
+          autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.blue, fontSize: 18),
-            ),
+            child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
                 Provider.of<TimeEntryProvider>(context, listen: false).addTask(
@@ -85,10 +91,7 @@ class TaskManagementScreen extends StatelessWidget {
                 Navigator.pop(context);
               }
             },
-            child: const Text(
-              'Add',
-              style: TextStyle(color: Colors.blue, fontSize: 18),
-            ),
+            child: const Text('Create'),
           ),
         ],
       ),

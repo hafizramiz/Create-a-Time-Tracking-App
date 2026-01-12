@@ -21,24 +21,63 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Time Tracking App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF458B7D),
-          primary: const Color(0xFF458B7D),
-          secondary: const Color(0xFF4B1D6E),
-          tertiary: const Color(0xFFF0C84B),
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF458B7D),
-          foregroundColor: Colors.white,
-          centerTitle: true,
-        ),
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFFF0C84B),
-          foregroundColor: Colors.black54,
-        ),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6200EE),
+          primary: const Color(0xFF6200EE),
+          secondary: const Color(0xFF03DAC6),
+          tertiary: const Color(0xFFF0C84B),
+          surface: Colors.grey[50]!,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Color(0xFF1A1C1E),
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1C1E),
+          ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: Colors.white,
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: const Color(0xFF6200EE),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF6200EE), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
       ),
       home: HomeScreen(),
     );
